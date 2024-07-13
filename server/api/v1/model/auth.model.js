@@ -44,6 +44,16 @@ const Auth = {
       throw error; // Ném lỗi để controller hoặc route bắt được và xử lý
     }
   },
+  authForgotPassword: async (email) => {
+    const sql_forgotpass = "SELECT * FROM users WHERE email=?";
+    try {
+      const result = await query(sql_forgotpass, [email]);
+      return result.length > 0 ? result[0] : null;
+    } catch (error) {
+      console.log("Lỗi khi thực hiện truy vấn:", error);
+      throw error;
+    }
+  },
 };
 
 module.exports = Auth;

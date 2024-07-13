@@ -1,7 +1,13 @@
 const fs = require("fs");
+const db = require("../../../config/database.config");
 const Auth = require("../model/auth.model");
 const jwt = require("jsonwebtoken");
 const { v4: uuidv4 } = require("uuid");
+const generateHelper = require("../../../helper/generate");
+const sendMailHelper = require("../../../helper/sendMail");
+const { promisify } = require("util");
+const query = promisify(db.query).bind(db);
+
 module.exports.authRegister = async (req, res) => {
   try {
     const id = uuidv4(); // Tạo ID duy nhất cho người dùng mới
@@ -90,6 +96,46 @@ module.exports.authLogin = async (req, res) => {
     }
   } catch (error) {
     console.log("Lỗi khi xử lý đăng nhập:", error);
+    res.status(500).json({
+      success: false,
+      message: "Lỗi máy chủ nội bộ",
+    });
+  }
+};
+module.exports.authForgotPassword = async (req, res) => {
+  try {
+    const id = uuidv4();
+    const { email } = req.body;
+    const user = await Auth.authForgotPassword(email);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const secretKey = "vanphutin-2004-29-02";
+    const token = jwt.sign({ email: user.email, userId: user.id }, secretKey, {
+      expiresIn: "1h",
+    });
+
+    const timeExpire = 5; // 5 phút
+    const otp = generateHelper.generateRandomNumber(6);
+    const expiresAt = new Date(Date.now() + timeExpire * 60 * 1000);
+
+    await query(
+      "INSERT INTO password_resets (id,email, token, otp, expires_at) VALUES (?,?, ?, ?, ?)",
+      [id, email, token, otp, expiresAt]
+    );
+
+    const subject = "Mã OTP xác minh lấy lại mật khẩu";
+    const text = `Mã OTP để lấy lại mật khẩu của bạn là <b>${otp}</b>(sử dụng trong ${timeExpire} phút), không chia sẻ mã này với ai!`;
+    sendMailHelper.sendEmail(email, subject, text);
+
+    res.json({
+      code: 200,
+      message: "Đã gửi mã qua mail!",
+    });
+  } catch (error) {
+    console.error("Lỗi khi xử lý quên mật khẩu:", error);
     res.status(500).json({
       success: false,
       message: "Lỗi máy chủ nội bộ",
