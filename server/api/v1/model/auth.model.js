@@ -54,6 +54,14 @@ const Auth = {
       throw error;
     }
   },
+  authEnterOtp: async (otp, email) => {
+    const sql_enterOtp =
+      "SELECT * FROM password_resets where otp=? and email=?";
+    try {
+      const result = await query(sql_enterOtp, [otp, email]);
+      return result.length > 0 ? result[0] : null;
+    } catch (error) {}
+  },
 };
 
 module.exports = Auth;

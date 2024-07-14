@@ -58,7 +58,7 @@ module.exports.authLogin = async (req, res) => {
     const { email, password } = req.body;
     // Gọi phương thức authLogin từ model để kiểm tra thông tin đăng nhập
     const login = await Auth.authLogin(email, password);
-    console.log("login", login);
+    // console.log("login", login);
     // Khóa bí mật
     const secretKey = "vanphutin-2004-29-02";
     if (login) {
@@ -118,7 +118,7 @@ module.exports.authForgotPassword = async (req, res) => {
     });
 
     const timeExpire = 5; // 5 phút
-    const otp = generateHelper.generateRandomNumber(6);
+    const otp = generateHelper.generateRandomNumber(4);
     const expiresAt = new Date(Date.now() + timeExpire * 60 * 1000);
 
     await query(
@@ -133,6 +133,37 @@ module.exports.authForgotPassword = async (req, res) => {
     res.json({
       code: 200,
       message: "Đã gửi mã qua mail!",
+      email,
+    });
+  } catch (error) {
+    console.error("Lỗi khi xử lý quên mật khẩu:", error);
+    res.status(500).json({
+      success: false,
+      message: "Lỗi máy chủ nội bộ",
+    });
+  }
+};
+
+module.exports.authEnterOtp = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+    const enterotp = await Auth.authEnterOtp(otp, email);
+    if (!enterotp) {
+      return res.status(404).json({ message: "Otp or email not found" });
+    }
+    const secretKey = "vanphutin-2004-29-02";
+    const token = jwt.sign(
+      { email: enterotp.email, otp: enterotp.otp },
+      secretKey,
+      {
+        expiresIn: "1h",
+      }
+    );
+
+    res.status(200).json({
+      code: 200,
+      message: "Login success !",
+      token,
     });
   } catch (error) {
     console.error("Lỗi khi xử lý quên mật khẩu:", error);
