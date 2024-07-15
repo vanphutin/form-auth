@@ -5,6 +5,7 @@ const database = require("./config/database.config");
 const apiRouterV1 = require("./api/v1/routers/index.router");
 const bodyParser = require("body-parser");
 const cors = require("cors");
+require("dotenv").config();
 const multer = require("multer");
 
 //cors
