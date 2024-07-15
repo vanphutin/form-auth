@@ -173,3 +173,35 @@ module.exports.authEnterOtp = async (req, res) => {
     });
   }
 };
+
+module.exports.authResetPassword = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const resetPass = await Auth.authResetPassword(email, password);
+
+    if (!resetPass) {
+      return res.status(404).json({ code: 400, message: "error" });
+    }
+
+    const secretKey = "vanphutin-2004-29-02";
+    const token = jwt.sign(
+      { email: resetPass.email, password: resetPass.password },
+      secretKey,
+      {
+        expiresIn: "1h",
+      }
+    );
+    res.status(200).json({
+      code: 200,
+      message: "password change success",
+      token,
+    });
+  } catch (error) {
+    console.error("Lỗi khi xử lý reset mật khẩu:", error);
+    res.status(500).json({
+      success: false,
+      message: "Lỗi máy chủ nội bộ",
+    });
+  }
+};

@@ -3,6 +3,8 @@ const { promisify } = require("util");
 const query = promisify(db.query).bind(db);
 const md5 = require("md5");
 
+// const { query } = require('../database'); // Giả sử bạn có module `query` để thực hiện truy vấn SQL
+
 const Auth = {
   // Hàm thực hiện đăng ký người dùng
   authRegister: async (
@@ -61,6 +63,17 @@ const Auth = {
       const result = await query(sql_enterOtp, [otp, email]);
       return result.length > 0 ? result[0] : null;
     } catch (error) {}
+  },
+  authResetPassword: async (email, password) => {
+    const sql_no_use_pass_old = "SELECT * FROM users WHERE password=?";
+    const sql_resetpass = "UPDATE users SET password=? WHERE email=? ";
+    try {
+      const result = await query(sql_resetpass, [md5(password), email]);
+      return result;
+    } catch (error) {
+      console.log("Lỗi khi thực hiện truy vấn:", error);
+      throw error;
+    }
   },
 };
 
