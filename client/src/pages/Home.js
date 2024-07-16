@@ -9,7 +9,7 @@ const Home = (props) => {
   console.log("user", user);
 
   const onButtonClick = () => {
-    // You'll update this function later
+    localStorage.removeItem("token");
     navigate("/login");
   };
 
