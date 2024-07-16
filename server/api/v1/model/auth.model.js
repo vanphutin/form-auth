@@ -62,14 +62,26 @@ const Auth = {
     try {
       const result = await query(sql_enterOtp, [otp, email]);
       return result.length > 0 ? result[0] : null;
-    } catch (error) {}
+    } catch (error) {
+      console.log("Lỗi khi thực hiện truy vấn:", error);
+      throw error;
+    }
   },
   authResetPassword: async (email, password) => {
-    const sql_no_use_pass_old = "SELECT * FROM users WHERE password=?";
     const sql_resetpass = "UPDATE users SET password=? WHERE email=? ";
     try {
       const result = await query(sql_resetpass, [md5(password), email]);
       return result;
+    } catch (error) {
+      console.log("Lỗi khi thực hiện truy vấn:", error);
+      throw error;
+    }
+  },
+  authVeryToken: async (email) => {
+    const sql_veryToken = "SELECT * FROM users WHERE email=?";
+    try {
+      const result = await query(sql_veryToken, [email]);
+      return result && result.length > 0 ? result[0] : null;
     } catch (error) {
       console.log("Lỗi khi thực hiện truy vấn:", error);
       throw error;

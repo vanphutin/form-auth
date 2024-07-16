@@ -70,7 +70,7 @@ module.exports.authLogin = async (req, res) => {
           expiresIn: "1h",
         }
       );
-
+      res.cookie("token", token, { httpOnly: true });
       // Trả về token và thông tin người dùng
       res.status(200).json({
         code: 200,
@@ -84,7 +84,6 @@ module.exports.authLogin = async (req, res) => {
           firstname: login.firstname,
           school: login.school,
           avatar: login.avatar,
-          // Các thông tin khác của người dùng nếu cần
         },
       });
     } else {
@@ -203,5 +202,55 @@ module.exports.authResetPassword = async (req, res) => {
       success: false,
       message: "Lỗi máy chủ nội bộ",
     });
+  }
+};
+
+module.exports.authVeryToken = async (req, res) => {
+  try {
+    const authHeader = req.headers["authorization"];
+    if (!authHeader) {
+      return res.status(401).json({ message: "No token provided" });
+    }
+
+    const token = authHeader.split(" ")[1];
+    if (!token) {
+      return res.status(401).json({ message: "No token provided" });
+    }
+
+    const secretKey = "vanphutin-2004-29-02";
+    jwt.verify(token, secretKey, async (err, decoded) => {
+      if (err) {
+        return res
+          .status(401)
+          .json({ message: "Failed to authenticate token" });
+      }
+
+      // Giả sử bạn có hàm này để lấy thông tin người dùng từ ID
+      const user = await Auth.authVeryToken(decoded?.email);
+      console.log("decoded.userId:", decoded?.email);
+      console.log("user:", user);
+
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      res.status(200).json({
+        code: 200,
+        success: true,
+        message: "Đăng nhập thành công",
+        user: {
+          id: user.idUser,
+          email: user.email,
+          lastname: user.lastname,
+          firstname: user.firstname,
+          school: user.school,
+          avatar: user.avatar,
+        },
+        token,
+      });
+    });
+  } catch (error) {
+    console.error("Error in authVeryToken:", error);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };
