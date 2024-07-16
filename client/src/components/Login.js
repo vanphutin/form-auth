@@ -37,8 +37,6 @@ const Login = () => {
       const result = await res.json();
 
       localStorage.setItem("token", result.token);
-      localStorage.setItem("userEmail", result.user.email);
-      localStorage.setItem("userName", result.user.username);
 
       // Lưu thông tin người dùng vào context
       setUser(result.user);
