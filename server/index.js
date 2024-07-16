@@ -7,6 +7,10 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 require("dotenv").config();
 const multer = require("multer");
+const cookieParser = require("cookie-parser");
+
+//cookie parser
+app.use(cookieParser());
 
 //cors
 app.use(cors());

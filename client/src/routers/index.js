@@ -11,7 +11,7 @@ const AuthLayout = () => {
   return <Outlet />;
 };
 
-export default createBrowserRouter([
+const router = createBrowserRouter([
   {
     element: <AuthLayout />,
     children: [
@@ -19,7 +19,10 @@ export default createBrowserRouter([
         path: "/login",
         element: <Login />,
       },
-      { path: "/pasword-forgot", element: <ForgotPassword /> },
+      {
+        path: "/pasword-forgot",
+        element: <ForgotPassword />,
+      },
       {
         path: "/password-otp",
         element: <EnterOtp />,
@@ -44,3 +47,5 @@ export default createBrowserRouter([
     ],
   },
 ]);
+
+export default router;
